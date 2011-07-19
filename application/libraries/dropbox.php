@@ -131,7 +131,7 @@ class dropbox
      * @param string $verifier this is the oauth_verifier returned with your callback url
      * @return array access token and token secret
      */
-    public function get_access_token($secret = false, $token = false, $verifier = false)
+    public function get_access_token($secret, $token = false, $verifier = false)
     {
         //If no request token was specified then attempt to get one from the url
         if($token === false && isset($_GET['oauth_token']))$token = $_GET['oauth_token'];
