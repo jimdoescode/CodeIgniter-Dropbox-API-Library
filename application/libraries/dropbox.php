@@ -190,7 +190,7 @@ class dropbox
     public function get($destination, $path, $root='dropbox')
     {
         $path = str_replace(' ', '%20', $path);
-        $this->_content_request("/files/{$root}/{$path}", $destination);
+        return $this->_content_request("/files/{$root}/{$path}", $destination);
     }
     
     /**
@@ -205,7 +205,7 @@ class dropbox
     public function thumbnail($destination, $path, $size='small', $format='JPEG', $root='dropbox')
     {
         $path = str_replace(' ', '%20', $path);
-        $this->_content_request("/thumbnails/{$root}/{$path}?size={$size}&format={$format}", $destination);
+        return $this->_content_request("/thumbnails/{$root}/{$path}?size={$size}&format={$format}", $destination);
     }
     
     /**
