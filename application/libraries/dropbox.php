@@ -178,8 +178,9 @@ class dropbox
     }
     
     /**
-     * Retrieve information about files in the currently authenticated user's
-     * dropbox account. Note: The path should be relative to the root dropbox
+     * Retrieve a file from the currently authenticated user's dropbox 
+     * account. Note: The path should be relative to the root dropbox
+     * folder and the destination should be relative to your sites root
      * folder.
      *
      * @param string $destination The path to create the new file
