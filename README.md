@@ -12,7 +12,9 @@ Usage
 Copy the files under your application directory. Then load the library like this:
 
 $params['key'] = 'YOUR DROPBOX CONSUMER KEY';
+
 $params['secret'] = 'YOUR DROPBOX CONSUMER SECRET';
+
 $this->load->library('dropbox', $params);
 
 $dbobj = $this->dropbox->account();
