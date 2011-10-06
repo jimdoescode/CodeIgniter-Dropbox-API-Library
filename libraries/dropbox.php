@@ -30,7 +30,7 @@ class dropbox
     const REQUEST_URI   = '/oauth/request_token';
     const ACCESS_URI    = '/oauth/access_token';
     
-    const API_VERSION   = '0';
+    const API_VERSION   = '1';
     
     const HTTP_1        = '1.1';
     const LINE_END      = "\r\n";
@@ -199,38 +199,33 @@ class dropbox
      *
      * @param string $destination The path to create the thumbnail image.
      * @param string $path The path to the image file or folder.
-     * @param string $size Options are 'small', 'medium' and 'large'
-     * @param string $format Options are 'JPEG' or 'PNG'
+     * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string root Either 'dropbox' or 'sandbox'
      **/
-    public function thumbnail($destination, $path, $size='small', $format='JPEG', $root='dropbox')
+    public function thumbnails($destination, $path, array $params = array('size'=>'small', 'format'=>'JPEG'), $root='dropbox')
     {
         $path = str_replace(' ', '%20', $path);
-        return $this->_content_request("/thumbnails/{$root}/{$path}?size={$size}&format={$format}", $destination);
+        $parstr = http_build_query($params);
+        return $this->_content_request("/thumbnails/{$root}/{$path}?{$parstr}", $destination);
     }
     
     /**
-     * Adds a local file to the authenticated user's dropbox account
+     * Adds a local file to the authenticated user's dropbox account using the post method
      *
      * @param string $dbpath The location in the user's dropbox to place the file.
      * @param string $filepath The relative path on the server of the file to upload.
+     * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function add($dbpath, $filepath, $root='dropbox')
+    public function add($dbpath, $filepath, array $params = array(), $root='dropbox')
     {
         $dbpath = str_replace(' ', '%20', $dbpath);
         $filename = rawurlencode($filepath);
-        $uri = reduce_double_slashes("/files/{$root}/{$dbpath}?file={$filename}");
+        $parstr = empty($params) ? '' : '&'.http_build_query($params);
+        $uri = reduce_double_slashes("/files/{$root}/{$dbpath}?file={$filename}{$parstr}");
         $specialhost = 'api-content.dropbox.com';
-        $request = "POST {$uri} HTTP/".self::HTTP_1.self::LINE_END;
-        $url = self::SCHEME."://{$specialhost}/".self::API_VERSION.$uri;
-        
-        $header = $this->_build_header($url, 'POST', $request, self::LINE_END, array('Host'=>$specialhost));
-        $postdata = array('file'=>'@'.$filepath);
-        
-        $response = $this->_connect($url, $header, $postdata);
-        return json_decode($response);
+        return $this->_post_request($uri, array('file'=>'@'.$filepath), $specialhost);
     }
     
     /**
@@ -239,25 +234,91 @@ class dropbox
      * to the root dropbox folder.
      *
      * @param string $path The path to the file or folder in question.
+     * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object.
      **/
-    public function metadata($path, $root='dropbox')
+    public function metadata($path, array $params = array(), $root='dropbox')
     {
         $path = str_replace(' ', '%20', $path);
-        return $this->_response_request("/metadata/{$root}/{$path}");
+        $parstr = empty($params) ? '' : '?'.http_build_query($params);
+        return $this->_response_request("/metadata/{$root}/{$path}{$parstr}");
     }
     
     /**
-     * Get a URL to a specific file in your drop box.
+     * Retrieve revision data about files or folders in the currently
+     * authenticated user's dropbox account. Note: The path should be relative
+     * to the root drop box folder.
      *
-     * @param string $path The path to the file or folder in question.
-     * @return string The URL to the file or folder.
+     * @param string $path The path to the file or folder in question
+     * @param array $params (optional) Consult the Dropbox API documentation for more details
+     * @param string $root (optional) Either 'dropbox' or 'sandbox'
+     * @return a response object.
      **/
-    public function link($path)
+    public function revisions($path, array $params = array(), $root='dropbox')
     {
         $path = str_replace(' ', '%20', $path);
-        return self::SCHEME.'://api.dropbox.com/'.self::API_VERSION."/links/{$path}";
+        $parstr = empty($params) ? '' : '?'.http_build_query($params);
+        return $this->_response_request("/revisions/{$root}/{$path}{$parstr}");
+    }
+    
+    /**
+     * Restore a file or folder to a previous revision.
+     *
+     * @param string $path The path to the file or folder in question
+     * @param string $revision The revision to revert to.
+     * @param string $root (optional) Either 'dropbox' or 'sandbox'
+     * @return a response object
+     **/
+    public function restore($path, $revision, $root='dropbox')
+    {
+        $path = str_replace(' ', '%20', $path);
+        return $this->_post_request("/restore/{$root}/{$path}", array('rev'=>$revision));
+    }
+    
+    /**
+     * Retrieve metadata for all files and folders that match the search query
+     *
+     * @param string $path The path to the file or folder in question
+     * @param string $query The search query must be at least 3 characters in length
+     * @param array $params (optional) Consult the Dropbox API documentation for more details
+     * @param strint $root (optional) Either 'dropbox' or 'sandbox'
+     * @return a response object
+     **/
+    public function search($path, $query, array $params = array(), $root='dropbox')
+    {
+        $path = str_replace(' ', '%20', $path);
+        $query = rawurlencode($query);
+        $parstr = empty($params) ? '' : '&'.http_build_query($params);
+        return $this->_response_request("/search/{$root}/{$path}?query={$query}{$parstr}");
+    }
+    
+    /**
+     * Retrieve a shareable link to files or folders. The link can be used
+     * publicly and directs to a preview page of the file. Also returns the
+     * link's expiration date.
+     *
+     * @param string $path The path to the file or folder in question
+     * @param strint $root (optional) Either 'dropbox' or 'sandbox'
+     * @return a response object
+     **/
+    public function shares($path, $root='dropbox')
+    {
+        $path = str_replace(' ', '%20', $path);
+        return $this->_response_request("/shares/{$root}/{$path}");
+    }
+    
+    /**
+     * Retrieve a link directly to a file.
+     *
+     * @param string $path The path to the file or folder in question
+     * @param strint $root (optional) Either 'dropbox' or 'sandbox'
+     * @return a response object
+     **/
+    public function media($path, $root='dropbox')
+    {
+        $path = str_replace(' ', '%20', $path);
+        return $this->_response_request("/media/{$root}/{$path}");
     }
     
     /**
@@ -315,6 +376,25 @@ class dropbox
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Below are the private methods used to create and send the requests to the dropbox api server.
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    private function _post_request($uri, array $data, $specialhost = false)
+    {
+        $request = "POST {$uri} HTTP/".self::HTTP_1.self::LINE_END;
+        $host = self::HOST;
+        $extra = array();
+        if($specialhost !== false)
+        {
+            $host = $specialhost;
+            $extra['Host'] = $specialhost;
+        }
+        $url = self::SCHEME."://{$host}/".self::API_VERSION.$uri;
+        
+        $header = $this->_build_header($url, 'POST', $request, self::LINE_END, $extra);
+        if(self::DEBUG)error_log($header);
+        
+        $response = $this->_connect($url, $header, $data);
+        return json_decode($response);
+    }
     
     private function _content_request($uri, $destination)
     {
