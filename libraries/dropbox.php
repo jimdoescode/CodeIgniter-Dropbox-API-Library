@@ -35,7 +35,7 @@ class dropbox
     const HTTP_1        = '1.1';
     const LINE_END      = "\r\n";
     
-    const DEBUG = false;
+    const DEBUG = true;
     
     //Array that should contain the consumer secret and
     //key which should be passed into the constructor.
@@ -266,14 +266,14 @@ class dropbox
      * Restore a file or folder to a previous revision.
      *
      * @param string $path The path to the file or folder in question
-     * @param string $revision The revision to revert to.
+     * @param string $revision The rev hash to revert to.
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
     public function restore($path, $revision, $root='dropbox')
     {
         $path = str_replace(' ', '%20', $path);
-        return $this->_post_request("/restore/{$root}/{$path}", array('rev'=>$revision));
+        return $this->_post_request("/restore/{$root}/{$path}?rev={$revision}");
     }
     
     /**
@@ -377,7 +377,7 @@ class dropbox
     // Below are the private methods used to create and send the requests to the dropbox api server.
     ////////////////////////////////////////////////////////////////////////////////////////////////
     
-    private function _post_request($uri, array $data, $specialhost = false)
+    private function _post_request($uri, $data = false, $specialhost = false)
     {
         $request = "POST {$uri} HTTP/".self::HTTP_1.self::LINE_END;
         $host = self::HOST;
@@ -392,7 +392,7 @@ class dropbox
         $header = $this->_build_header($url, 'POST', $request, self::LINE_END, $extra);
         if(self::DEBUG)error_log($header);
         
-        $response = $this->_connect($url, $header, $data);
+        $response = $this->_connect($url, $header, 'POST', $data);
         return json_decode($response);
     }
     
@@ -406,7 +406,7 @@ class dropbox
         $header = $this->_build_header($url, 'GET', $request, self::LINE_END, array('Host'=>$specialhost));
         if(self::DEBUG)error_log($header);
         
-        $this->_connect($url, $header, false, $destination);
+        $this->_connect($url, $header, 'GET', false, $destination);
     }
     
     private function _response_request($uri)
@@ -418,7 +418,7 @@ class dropbox
         $header = $this->_build_header($url, 'GET', $request, self::LINE_END);
         if(self::DEBUG)error_log($header);
         
-        $response = $this->_connect($url, $header, false);
+        $response = $this->_connect($url, $header, 'GET');
         return json_decode($response);
     }
     
@@ -436,7 +436,7 @@ class dropbox
         return $str;
     }
     
-    private function _connect($url, $header, $postdata = false, $destination = false)
+    private function _connect($url, $header, $request, $postdata = false, $destination = false)
     {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC ) ;
@@ -444,6 +444,7 @@ class dropbox
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request);
         curl_setopt($ch, CURLOPT_HTTPHEADER, explode(self::LINE_END, $header));
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
@@ -454,6 +455,13 @@ class dropbox
         }
         
         $response = curl_exec($ch);
+        
+        if(self::DEBUG)
+        {
+            error_log(print_r(curl_getinfo($ch), true));
+            error_log($response);
+        }
+    
         //If the specified a destination and the request went OK write the file.
         if($destination !== false && curl_getinfo($ch, CURLINFO_HTTP_CODE) == '200')
         {
