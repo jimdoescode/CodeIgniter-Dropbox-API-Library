@@ -107,7 +107,7 @@ class dropbox
             $str .= ",{$key}=\"{$value}\"";
         $str = 'Authorization: OAuth '.substr($str, 1);
         //Send it
-        $response = $this->_connect($baseurl, $str);
+        $response = $this->_connect($baseurl, $str, $this->_consumer['method']);
         
         //We should get back a request token and secret which
         //we will add to the redirect url.
@@ -155,7 +155,7 @@ class dropbox
         //Include the token and verifier into the header request.
         $auth = get_auth_header($baseurl, $this->_consumer['key'], $this->_consumer['secret'],
                                 $tokenddata, $this->_consumer['method'], $this->_consumer['algorithm']);
-        $response = $this->_connect($baseurl, $auth);
+        $response = $this->_connect($baseurl, $auth, $this->_consumer['method']);
         //Parse the response into an array it should contain
         //both the access token and the secret key. (You only
         //need the secret key if you use HMAC-SHA1 signatures.)
