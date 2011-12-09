@@ -1,4 +1,4 @@
 name: dropbox
-version: 1.1.1
+version: 1.1.2
 compatibility: 2.0.3
 tags: ["dropbox", "dropbox api", "dropbox oauth", "api"]
