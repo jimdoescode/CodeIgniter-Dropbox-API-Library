@@ -6,6 +6,7 @@ class Example extends CI_Controller
     {
     	parent::__construct();
         $this->load->library('session');
+        $this->load->helper('url');
     }
     // Call this method first by visiting http://SITE_URL/example/request_dropbox
     public function request_dropbox()
