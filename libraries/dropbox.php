@@ -30,12 +30,13 @@ class dropbox
     const REQUEST_URI   = '/oauth/request_token';
     const ACCESS_URI    = '/oauth/access_token';
     
+    const DEFAULT_ROOT  = 'dropbox';//Customize which root you wish the library to default to
     const API_VERSION   = '1';
     
     const HTTP_1        = '1.1';
     const LINE_END      = "\r\n";
     
-    const DEBUG = true;
+    const DEBUG = false;
     
     //Array that should contain the consumer secret and
     //key which should be passed into the constructor.
@@ -188,7 +189,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object.
      **/
-    public function get($destination, $path, $root='dropbox')
+    public function get($destination, $path, $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         return $this->_content_request("/files/{$root}/{$path}", $destination);
@@ -202,7 +203,7 @@ class dropbox
      * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string root Either 'dropbox' or 'sandbox'
      **/
-    public function thumbnails($destination, $path, array $params = array('size'=>'small', 'format'=>'JPEG'), $root='dropbox')
+    public function thumbnails($destination, $path, array $params = array('size'=>'small', 'format'=>'JPEG'), $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         $parstr = http_build_query($params);
@@ -218,7 +219,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function add($dbpath, $filepath, array $params = array(), $root='dropbox')
+    public function add($dbpath, $filepath, array $params = array(), $root=self::DEFAULT_ROOT)
     {
         $dbpath = str_replace(' ', '%20', $dbpath);
         $filename = rawurlencode($filepath);
@@ -238,7 +239,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object.
      **/
-    public function metadata($path, array $params = array(), $root='dropbox')
+    public function metadata($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         $parstr = empty($params) ? '' : '?'.http_build_query($params);
@@ -255,7 +256,7 @@ class dropbox
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object.
      **/
-    public function revisions($path, array $params = array(), $root='dropbox')
+    public function revisions($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         $parstr = empty($params) ? '' : '?'.http_build_query($params);
@@ -270,7 +271,7 @@ class dropbox
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function restore($path, $revision, $root='dropbox')
+    public function restore($path, $revision, $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         return $this->_post_request("/restore/{$root}/{$path}?rev={$revision}");
@@ -285,7 +286,7 @@ class dropbox
      * @param strint $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function search($path, $query, array $params = array(), $root='dropbox')
+    public function search($path, $query, array $params = array(), $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         $query = rawurlencode($query);
@@ -302,7 +303,7 @@ class dropbox
      * @param strint $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function shares($path, $root='dropbox')
+    public function shares($path, $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         return $this->_response_request("/shares/{$root}/{$path}");
@@ -315,7 +316,7 @@ class dropbox
      * @param strint $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function media($path, $root='dropbox')
+    public function media($path, $root=self::DEFAULT_ROOT)
     {
         $path = str_replace(' ', '%20', $path);
         return $this->_response_request("/media/{$root}/{$path}");
@@ -329,7 +330,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function copy($from, $to, $root='dropbox')
+    public function copy($from, $to, $root=self::DEFAULT_ROOT)
     {
         return $this->_response_request('/fileops/copy?from_path='.rawurlencode($from).'&to_path='.rawurlencode($to).'&root='.$root);
     }
@@ -342,7 +343,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function create_folder($path, $root='dropbox')
+    public function create_folder($path, $root=self::DEFAULT_ROOT)
     {
         return $this->_response_request('/fileops/create_folder?path='.rawurlencode($path).'&root='.$root);
     }
@@ -355,7 +356,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function delete($path, $root='dropbox')
+    public function delete($path, $root=self::DEFAULT_ROOT)
     {
         return $this->_response_request('/fileops/delete?path='.rawurlencode($path).'&root='.$root);
     }
@@ -368,7 +369,7 @@ class dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
-    public function move($from, $to, $root='dropbox')
+    public function move($from, $to, $root=self::DEFAULT_ROOT)
     {
         return $this->_response_request('/fileops/move?from_path='.rawurlencode($from).'&to_path='.rawurlencode($to).'&root='.$root);
     }
