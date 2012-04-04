@@ -384,9 +384,17 @@ class Dropbox
      **/
     public function delta($cursor=false)
     {
-        if($cursor !== false)$this->_access['cursor'] = $cursor;
-        $obj = $this->_post_request('/delta');
-        unset($this->_access['cursor']);
+        $data = array();
+        if($cursor !== false)
+        {
+            //Add the cursor to the access array to generate
+            //the correct signature base string
+            $this->_access['cursor'] = $cursor;
+            $data['cursor'] = $cursor;
+        }
+        $obj = $this->_post_request('/delta', $data);
+        //Reset our access array to prepare for the next round of calls.
+        if(array_key_exists('cursor', $this->_access))unset($this->_access['cursor']);
         return $obj;
     }
 
