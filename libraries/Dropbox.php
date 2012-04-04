@@ -201,7 +201,7 @@ class Dropbox
      * @param string $destination The path to create the thumbnail image.
      * @param string $path The path to the image file or folder.
      * @param array $params (optional) Consult the Dropbox API documentation for more details
-     * @param string root Either 'dropbox' or 'sandbox'
+     * @param string $root Either 'dropbox' or 'sandbox'
      **/
     public function thumbnails($destination, $path, array $params = array('size'=>'small', 'format'=>'JPEG'), $root=self::DEFAULT_ROOT)
     {
@@ -283,7 +283,7 @@ class Dropbox
      * @param string $path The path to the file or folder in question
      * @param string $query The search query must be at least 3 characters in length
      * @param array $params (optional) Consult the Dropbox API documentation for more details
-     * @param strint $root (optional) Either 'dropbox' or 'sandbox'
+     * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
     public function search($path, $query, array $params = array(), $root=self::DEFAULT_ROOT)
@@ -300,7 +300,7 @@ class Dropbox
      * link's expiration date.
      *
      * @param string $path The path to the file or folder in question
-     * @param strint $root (optional) Either 'dropbox' or 'sandbox'
+     * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
     public function shares($path, $root=self::DEFAULT_ROOT)
@@ -313,7 +313,7 @@ class Dropbox
      * Retrieve a link directly to a file.
      *
      * @param string $path The path to the file or folder in question
-     * @param strint $root (optional) Either 'dropbox' or 'sandbox'
+     * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return a response object
      **/
     public function media($path, $root=self::DEFAULT_ROOT)
@@ -334,7 +334,21 @@ class Dropbox
     {
         return $this->_response_request('/fileops/copy?from_path='.rawurlencode($from).'&to_path='.rawurlencode($to).'&root='.$root);
     }
-    
+
+    /**
+     * Creates a reference string that can be used to copy a file to another
+     * user's Dropbox.
+     *
+     * @param string $path The path to the file or folder in question
+     * @param string $root (optional) Either 'dropbox' or 'sandbox'
+     * @return a response object
+     **/
+    public function copy_ref($path, $root=self::DEFAULT_ROOT)
+    {
+        $path = str_replace(' ', '%20', $path);
+        return $this->_response_request("/copy_ref/{$root}/{$path}");
+    }
+
     /**
      * Create a folder relative to the user's Dropbox root or the user's
      * application sandbox folder.
@@ -360,7 +374,22 @@ class Dropbox
     {
         return $this->_response_request('/fileops/delete?path='.rawurlencode($path).'&root='.$root);
     }
-    
+
+    /**
+     * Periodically call to get a list of "delta entries", which are instructions
+     * on how to update your local state to match the server's state.
+     *
+     * @param string $cursor (optional) The cursor from the last delta call.
+     * @return a response object
+     **/
+    public function delta($cursor=false)
+    {
+        if($cursor !== false)$this->_access['cursor'] = $cursor;
+        $obj = $this->_post_request('/delta');
+        unset($this->_access['cursor']);
+        return $obj;
+    }
+
     /**
      * Copies a file or folder in dropbox to another location within dropbox.
      *
