@@ -191,7 +191,7 @@ class Dropbox
      **/
     public function get($destination, $path, $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         return $this->_content_request("/files/{$root}/{$path}", $destination);
     }
     
@@ -205,7 +205,7 @@ class Dropbox
      **/
     public function thumbnails($destination, $path, array $params = array('size'=>'small', 'format'=>'JPEG'), $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         $parstr = http_build_query($params);
         return $this->_content_request("/thumbnails/{$root}/{$path}?{$parstr}", $destination);
     }
@@ -241,7 +241,7 @@ class Dropbox
      **/
     public function metadata($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         $parstr = empty($params) ? '' : '?'.http_build_query($params);
         return $this->_response_request("/metadata/{$root}/{$path}{$parstr}");
     }
@@ -258,7 +258,7 @@ class Dropbox
      **/
     public function revisions($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         $parstr = empty($params) ? '' : '?'.http_build_query($params);
         return $this->_response_request("/revisions/{$root}/{$path}{$parstr}");
     }
@@ -273,7 +273,7 @@ class Dropbox
      **/
     public function restore($path, $revision, $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         return $this->_post_request("/restore/{$root}/{$path}?rev={$revision}");
     }
     
@@ -288,7 +288,7 @@ class Dropbox
      **/
     public function search($path, $query, array $params = array(), $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         $query = rawurlencode($query);
         $parstr = empty($params) ? '' : '&'.http_build_query($params);
         return $this->_response_request("/search/{$root}/{$path}?query={$query}{$parstr}");
@@ -305,7 +305,7 @@ class Dropbox
      **/
     public function shares($path, $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         return $this->_response_request("/shares/{$root}/{$path}");
     }
     
@@ -318,7 +318,7 @@ class Dropbox
      **/
     public function media($path, $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         return $this->_response_request("/media/{$root}/{$path}");
     }
     
@@ -345,7 +345,7 @@ class Dropbox
      **/
     public function copy_ref($path, $root=self::DEFAULT_ROOT)
     {
-        $path = str_replace(' ', '%20', $path);
+        $path = str_replace('%2F', '/', rawurlencode($path));
         return $this->_response_request("/copy_ref/{$root}/{$path}");
     }
 
