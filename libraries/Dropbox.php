@@ -53,12 +53,10 @@ class Dropbox
     /**
      * Pass in a parameters array which should look as follows:
      * array('key'=>'example.com', 'secret'=>'mysecret');
-     * Note that the secret should either be a hash string for
-     * HMAC signatures or a file path string for RSA signatures.
      *
      * @param array $params
      */
-    public function dropbox($params)
+    public function __construct($params)
     {
         $this->CI =& get_instance();
         $this->CI->load->helper('oauth');
