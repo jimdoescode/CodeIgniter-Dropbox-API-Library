@@ -130,13 +130,12 @@ class Dropbox
      * @param string $verifier this is the oauth_verifier returned with your callback url
      * @return array access token and token secret
      */
-    public function get_access_token($secret, $token = false, $verifier = false)
+    public function get_access_token($secret, $token = false)
     {
         //If no request token was specified then attempt to get one from the url
         if($token === false && isset($_GET['oauth_token']))$token = $_GET['oauth_token'];
-        if($verifier === false && isset($_GET['oauth_verifier']))$verifier = $_GET['oauth_verifier'];
         //If all else fails attempt to get it from the request uri.
-        if($token === false && $verifier === false)
+        if($token === false)
         {
             $uri = $_SERVER['REQUEST_URI'];
             $uriparts = explode('?', $uri);
@@ -144,10 +143,9 @@ class Dropbox
             $authfields = array();
             parse_str($uriparts[1], $authfields);
             $token = $authfields['oauth_token'];
-            $verifier = $authfields['oauth_verifier'];
         }
         
-        $tokenddata = array('oauth_token'=>urlencode($token), 'oauth_verifier'=>urlencode($verifier));
+        $tokenddata = array('oauth_token'=>urlencode($token));
         if($secret !== false)$tokenddata['oauth_token_secret'] = urlencode($secret);
         
         $baseurl = self::SCHEME.'://'.self::HOST.'/'.self::API_VERSION.self::ACCESS_URI;
