@@ -167,7 +167,7 @@ class Dropbox
     /**
      * Retrieve information about the authenticated users account.
      *
-     * @return a response object
+     * @return object response
      **/
     public function account()
     {
@@ -183,7 +183,7 @@ class Dropbox
      * @param string $destination The path to create the new file
      * @param string $path The path to the file or folder in question.
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object.
+     * @return boolean true on success false on failure.
      **/
     public function get($destination, $path, $root=self::DEFAULT_ROOT)
     {
@@ -198,6 +198,7 @@ class Dropbox
      * @param string $path The path to the image file or folder.
      * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root Either 'dropbox' or 'sandbox'
+     * @return boolean true on success false on failure.
      **/
     public function thumbnails($destination, $path, array $params = array('size'=>'small', 'format'=>'JPEG'), $root=self::DEFAULT_ROOT)
     {
@@ -213,7 +214,7 @@ class Dropbox
      * @param string $filepath The relative path on the server of the file to upload.
      * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function add($dbpath, $filepath, array $params = array(), $root=self::DEFAULT_ROOT)
     {
@@ -233,7 +234,7 @@ class Dropbox
      * @param string $path The path to the file or folder in question.
      * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object.
+     * @return object response
      **/
     public function metadata($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
@@ -250,7 +251,7 @@ class Dropbox
      * @param string $path The path to the file or folder in question
      * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
-     * @return a response object.
+     * @return object response
      **/
     public function revisions($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
@@ -265,7 +266,7 @@ class Dropbox
      * @param string $path The path to the file or folder in question
      * @param string $revision The rev hash to revert to.
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function restore($path, $revision, $root=self::DEFAULT_ROOT)
     {
@@ -280,7 +281,7 @@ class Dropbox
      * @param string $query The search query must be at least 3 characters in length
      * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function search($path, $query, array $params = array(), $root=self::DEFAULT_ROOT)
     {
@@ -297,7 +298,7 @@ class Dropbox
      *
      * @param string $path The path to the file or folder in question
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function shares($path, $root=self::DEFAULT_ROOT)
     {
@@ -310,7 +311,7 @@ class Dropbox
      *
      * @param string $path The path to the file or folder in question
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function media($path, $root=self::DEFAULT_ROOT)
     {
@@ -324,7 +325,7 @@ class Dropbox
      * @param string $from The relative path to the file to be copied.
      * @param string $to The relative path (Including file or folder name) to place to copy.
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function copy($from, $to, $root=self::DEFAULT_ROOT)
     {
@@ -337,7 +338,7 @@ class Dropbox
      *
      * @param string $path The path to the file or folder in question
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function copy_ref($path, $root=self::DEFAULT_ROOT)
     {
@@ -351,7 +352,7 @@ class Dropbox
      *
      * @param string $path The path to the new folder to create.
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function create_folder($path, $root=self::DEFAULT_ROOT)
     {
@@ -364,7 +365,7 @@ class Dropbox
      *
      * @param string $path The path to the folder or file to delete.
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function delete($path, $root=self::DEFAULT_ROOT)
     {
@@ -376,7 +377,7 @@ class Dropbox
      * on how to update your local state to match the server's state.
      *
      * @param string $cursor (optional) The cursor from the last delta call.
-     * @return a response object
+     * @return object response
      **/
     public function delta($cursor=false)
     {
@@ -400,7 +401,7 @@ class Dropbox
      * @param string $from The relative path to the file to be moved.
      * @param string $to The relative path (Including file or folder name) to the new location.
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return a response object
+     * @return object response
      **/
     public function move($from, $to, $root=self::DEFAULT_ROOT)
     {
@@ -440,7 +441,7 @@ class Dropbox
         $header = $this->_build_header($url, 'GET', $request, self::LINE_END, array('Host'=>$specialhost));
         if(self::DEBUG)error_log($header);
         
-        $this->_connect($url, $header, 'GET', false, $destination);
+        return $this->_connect($url, $header, 'GET', false, $destination);
     }
     
     private function _response_request($uri)
@@ -495,17 +496,30 @@ class Dropbox
             error_log(print_r(curl_getinfo($ch), true));
             error_log($response);
         }
-    
-        //If the specified a destination and the request went OK write the file.
-        if($destination !== false && curl_getinfo($ch, CURLINFO_HTTP_CODE) == '200')
+        
+    	$code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    	curl_close($ch);
+        
+        //If this is a content request write the file
+        if($destination !== false)
         {
-            $fh = fopen($destination, 'w');
-            fwrite($fh, $response);
-            if($fh !== false)fclose($fh);
+        	//If the response was good then write
+            //the file and return true
+        	if($code == '200')
+        	{
+				$fh = fopen($destination, 'w');
+				fwrite($fh, $response);
+				if($fh !== false)
+                {
+                    fclose($fh);
+                    return true;
+                }
+			}
+            //The response was bad or the file couldn't
+            //be written so return false.
+			return false;
         }
-        curl_close($ch);
-        return $response;
+        else return $response;
     }
 }
 // ./application/libraries
-?>
