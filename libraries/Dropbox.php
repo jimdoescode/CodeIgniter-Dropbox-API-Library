@@ -180,10 +180,10 @@ class Dropbox
      * folder and the destination should be relative to your sites root
      * folder.
      *
-     * @param string $destination The path to create the new file
+     * @param mixed $destination The path to create the new file at or false if you want the file contents returned.
      * @param string $path The path to the file or folder in question.
      * @param string $root Either 'dropbox' or 'sandbox'
-     * @return boolean true on success false on failure.
+     * @return mixed true on success false on failure if a destination is specified otherwise the contents of the file are returned as a string
      **/
     public function get($destination, $path, $root=self::DEFAULT_ROOT)
     {
@@ -297,13 +297,15 @@ class Dropbox
      * link's expiration date.
      *
      * @param string $path The path to the file or folder in question
+     * @param array $params (optional) Consult the Dropbox API documentation for more details
      * @param string $root (optional) Either 'dropbox' or 'sandbox'
      * @return object response
      **/
-    public function shares($path, $root=self::DEFAULT_ROOT)
+    public function shares($path, array $params = array(), $root=self::DEFAULT_ROOT)
     {
         $path = str_replace('%2F', '/', rawurlencode($path));
-        return $this->_response_request("/shares/{$root}/{$path}");
+        $parstr = empty($params) ? '' : '?'.http_build_query($params);
+        return $this->_response_request("/shares/{$root}/{$path}{$parstr}");
     }
     
     /**
