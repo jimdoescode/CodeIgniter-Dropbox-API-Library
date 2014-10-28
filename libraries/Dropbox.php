@@ -478,8 +478,10 @@ class Dropbox
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC ) ;
         curl_setopt($ch, CURLOPT_SSLVERSION, 1); // Require TLS
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CAINFO, __DIR__."/certs/trusted-certs.crt");
+        curl_setopt($ch, CURLOPT_CAPATH, __DIR__."/certs/");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $request);
         curl_setopt($ch, CURLOPT_HTTPHEADER, explode(self::LINE_END, $header));
