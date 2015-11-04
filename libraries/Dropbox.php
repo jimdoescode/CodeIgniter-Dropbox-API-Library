@@ -236,7 +236,7 @@ class Dropbox
      * @param string $root Either 'dropbox' or 'sandbox'
      * @return object response
      **/
-    public function metadata($path, array $params = array(), $root=self::DEFAULT_ROOT)
+    public function metadata($path = null, array $params = array(), $root=self::DEFAULT_ROOT)
     {
         $path = str_replace('%2F', '/', rawurlencode($path));
         $parstr = empty($params) ? '' : '?'.http_build_query($params);
